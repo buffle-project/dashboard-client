@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  
+  # Host / Shell Buffle application
+  host:
+    build:
+      context: ${BUILD_CONTEXT}/host
+      dockerfile: Dockerfile
+    ports: 
+      - "3000:3000"
+
+  # Remote application  
+  remote: 
+    build:
+      context: ${BUILD_CONTEXT}/remote
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+
+  # Nginx Web server & Reverse proxy
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ${BUILD_CONTEXT}/host/dist:/usr/share/nginx/html/host
+      - ${BUILD_CONTEXT}/remote/dist:/usr/share/nginx/html/remote
+  
