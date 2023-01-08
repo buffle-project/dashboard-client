@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  
+  
+  # Host / Shell Buffle application
+  host:
+    build:
+      context: ${BUILD_CONTEXT}/host
+      dockerfile: Dockerfile
+    ports: 
+      - "3000:3000"
+    volumes:
+      - ./volumes/host:/usr/src/app
+    environment:
+      - NODE_ENV=production
+
+
+  # Remote application  
+  remote: 
+    build:
+      context: ${BUILD_CONTEXT}/remote
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./volumes/remote:/usr/src/app
+    environment:
+      - NODE_ENV=production
+    
+
+  # Nginx Web server & Reverse proxy
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./volumes/nginx:/etc/nginx/conf.d
+      - ${BUILD_CONTEXT}/host/dist:/usr/share/nginx/html/host
+      - ${BUILD_CONTEXT}/remote/dist:/usr/share/nginx/html/remote
+    depends_on:
+      - host
+      - remote
+  
